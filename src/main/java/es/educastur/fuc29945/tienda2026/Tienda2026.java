@@ -65,7 +65,7 @@ public class Tienda2026 {
 //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="MENU">
-    public void menu(){
+    private void menu(){
         int opcion=0;
         do{
             System.out.println("\n\n\n\n\n\t\t\t\tTIENDA\n");
@@ -176,7 +176,24 @@ public class Tienda2026 {
 //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="ARTICULO">
     private void altaArticulos() {
-        
+        String idArticulo, descripcion, existencias, pvp;
+        System.out.println("Alta del articulo nuevo");
+        do {            
+            System.out.println("Dame el id del articulo nuevo");
+            idArticulo=sc.nextLine();
+        } while (!idArticulo.matches("[1-5][-][0-9][0-9]")||articulos.values().equals(idArticulo));
+        System.out.println("Introduzca la descripcion del articulo");
+        descripcion=sc.nextLine();
+        do {            
+            System.out.println("Introduzca las existencias de articulo nuevo");
+            existencias=sc.nextLine();
+        } while (!MetodosAuxiliares.esInt(existencias));
+        do {            
+            System.out.println("Introduzca el precio de articulo");
+            pvp=sc.nextLine();
+        } while (!MetodosAuxiliares.esDouble(pvp));
+        Articulo a =new Articulo(idArticulo, descripcion, Integer.parseInt(existencias),Double.parseDouble(pvp));
+        articulos.put(idArticulo, a);
     }
 
     private void bajaArticulos() {
@@ -202,7 +219,7 @@ public class Tienda2026 {
     }
 
     private void modificarCliente() {
-        
+       
     }
 
     private void listarCliente() {
