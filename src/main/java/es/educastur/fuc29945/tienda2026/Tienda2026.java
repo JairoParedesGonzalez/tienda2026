@@ -32,6 +32,8 @@ public class Tienda2026 {
         Tienda2026 t2026=new Tienda2026();
         t2026.cargaDatos();
         t2026.menu();
+        //t2026.filtrarPorPrecio();
+        //t2026.filtradoArticuloPorValor();
     }
     //<editor-fold defaultstate="collapsed" desc="CARGA DATOS">
     public void cargaDatos(){
@@ -125,7 +127,7 @@ public class Tienda2026 {
     private void menuClientes() {
         int opcion=0;
         do{
-            System.out.println("\n\n\n\n\n\t\t\t\tMENU ARTICULOS\n");
+            System.out.println("\n\n\n\n\n\t\t\t\tMENU CLIENTES\n");
             System.out.println("\t\t\t\t1 - ALTA");
             System.out.println("\t\t\t\t2 - BAJA");
             System.out.println("\t\t\t\t3 - MODIFICAR");
@@ -210,21 +212,39 @@ public class Tienda2026 {
 //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="CLIENTE">
     private void altaCliente() {
+        System.out.println("Ingrese su nombre");
+        String nombre=sc.next().toUpperCase();
+        String dni;
+        do {            
+            System.out.println("Ingrese su dni");
+            dni=sc.next().toUpperCase();
+        } while (!MetodosAuxiliares.validarDNI(dni));
+        System.out.println("El dni correcto es "+dni);
+        System.out.println("Ingrese su nº de telefono");
+        String telefono=sc.next();
+        System.out.println("Ingrese su email");
+        String email=sc.next().toLowerCase();
+        clientes.put(dni,new Cliente(dni,nombre,telefono,email));
     }
-
     private void bajaCliente() {
         
     }
-
     private void modificarCliente() {
-       
+        String dni,nombre,telefono,email;
+        do {         
+            System.out.println("Introduzca el dni del cliente que quiere modificar");
+            dni=sc.next();
+        } while (!clientes.containsKey(dni)||!MetodosAuxiliares.validarDNI(dni));
+        System.out.println("Introduzca el nombre del usuario");
+        nombre=sc.next().toUpperCase();
+        System.out.println("Introduzca el telefono");
+        telefono=sc.next();
+        System.out.println("Introduzca el email");
+        email=sc.next().toLowerCase();
+        clientes.replace(dni,new Cliente(dni,nombre,telefono,email));
     }
-
     private void listarCliente() {
-        System.out.println("Listado de Clientes");
-        for (Cliente c : clientes.values()) {
-            System.out.println(c);
-        }
+        clientes.values().stream().forEach(c->System.out.println(c));
     }
 //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="PEDIDO">
@@ -327,6 +347,23 @@ public class Tienda2026 {
     private void pedidoOrdenadoMayorAMenorPrecioTotal(){
         pedidos.stream().sorted(Comparator.comparingDouble(p->totalPedido((Pedido)p)).reversed())
                 .forEach(p->System.out.println(p+"- Total: "+totalPedido(p)));
+    }
+    private void filtrarPorPrecio(){
+        pedidos.stream().filter(p->totalPedido((Pedido)p)>1000)
+                .forEach(p->System.out.println(p+"- Total: "+totalPedido(p)));
+    }
+    private void filtradoArticuloPorValor(){
+        articulos.values().stream()
+                .filter(a->a.getPvp()<100)
+                .sorted(Comparator.comparing(Articulo::getPvp)).forEach(a->System.out.println(a));
+        //simplemente mostramos todos los articulos menores de 100 euros ordenados por precio de menor a mayor
+        System.out.println("");
+        articulos.values().stream()
+                .filter(a->a.getPvp()<100)
+                .sorted(Comparator.comparing(Articulo::getPvp).reversed()).forEach(a->System.out.println(a));
+
+        /*ArrayList<Articulo> articulosAux= new ArrayList(articulos.values());//convertimos un Hashmap a arraylist
+        articulosAux.stream().sorted().forEach(a->System.out.println(a));*/
     }
 //</editor-fold>
     
