@@ -4,6 +4,7 @@
 
 package es.educastur.fuc29945.tienda2026;
 
+import java.net.ContentHandlerFactory;
 import java.util.Scanner;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -31,9 +32,14 @@ public class Tienda2026 {
     public static void main(String[] args) {
         Tienda2026 t2026=new Tienda2026();
         t2026.cargaDatos();
-        t2026.menu();
+        //t2026.menu();
         //t2026.filtrarPorPrecio();
         //t2026.filtradoArticuloPorValor();
+        t2026.uno();
+        t2026.dos();
+        t2026.tres();
+        t2026.cuatro();
+        t2026.cinco();
     }
     //<editor-fold defaultstate="collapsed" desc="CARGA DATOS">
     public void cargaDatos(){
@@ -366,5 +372,108 @@ public class Tienda2026 {
         articulosAux.stream().sorted().forEach(a->System.out.println(a));*/
     }
 //</editor-fold>
-    
+    //<editor-fold defaultstate="collapsed" desc="EXAMEN">
+    private void uno(){
+        int opcion=0;
+        do{
+            System.out.println("\n\n\n\n\n\t\t\t\tSECCION\n");
+            System.out.println("\t\t\t\t1 - PERIFERICOS");
+            System.out.println("\t\t\t\t2 - ALMACENAMIENTO");
+            System.out.println("\t\t\t\t3 - IMPRESORAS");
+            System.out.println("\t\t\t\t4 - MONITORES");
+            System.out.println("\t\t\t\t9 - SALIR");
+            opcion=sc.nextInt();
+            ArrayList<Articulo> articulosAux= new ArrayList(articulos.values());
+            switch (opcion){
+                case 1:{
+                    articulosAux.stream().filter(a->a.getIdArticulo().startsWith("1"))
+                            .forEach(a->System.out.println(a));
+                    break;
+                }    
+                case 2:{
+                    articulosAux.stream().filter(a->a.getIdArticulo().startsWith("2"))
+                            .forEach(a->System.out.println(a));
+                    break;
+                } 
+                case 3:{
+                    articulosAux.stream().filter(a->a.getIdArticulo().startsWith("3"))
+                            .forEach(a->System.out.println(a));
+                    break;
+                } 
+                case 4:{
+                    articulosAux.stream().filter(a->a.getIdArticulo().startsWith("4"))
+                            .forEach(a->System.out.println(a));
+                    break;
+                } 
+            }
+        }while (opcion != 9);
+    }
+    private void dos(){
+        ArrayList<Articulo> articulosAux= new ArrayList(articulos.values());
+        System.out.println("PERIFERICOS");
+        articulosAux.stream().filter(a->a.getIdArticulo().startsWith("1"))
+                            .forEach(a->System.out.println(a));
+        System.out.println("ALMACENAMIENTO");
+        articulosAux.stream().filter(a->a.getIdArticulo().startsWith("2"))
+                            .forEach(a->System.out.println(a));
+        System.out.println("IMPRESORAS");
+        articulosAux.stream().filter(a->a.getIdArticulo().startsWith("3"))
+                            .forEach(a->System.out.println(a));
+        System.out.println("MONITORES");
+        articulosAux.stream().filter(a->a.getIdArticulo().startsWith("4"))
+                            .forEach(a->System.out.println(a));
+    }
+    private void tres(){
+        System.out.println("Introduzca el DNI del cliente");
+        String idCliente=sc.next();
+        System.out.println("Pedidos del cliente "+clientes.get(idCliente).getNombre());
+        double precioTotal=0;
+        for (Pedido p:pedidos) {
+            double precioPedido=0;
+            if (p.getClientePedido().getIdCliente().equalsIgnoreCase(idCliente)) {
+                for (LineaPedido l : p.getCestaCompra()) {
+                    precioPedido+=l.getUnidades()*articulos.get(l.getIdArticulo()).getPvp();
+                    
+                }
+                System.out.println(p+" - "+precioPedido);
+                precioTotal+=precioPedido;
+            }     
+        }
+        System.out.println("Total gastado: "+precioTotal);
+    }
+    private void cuatro(){
+        articulos.values().stream().sorted(Comparator.comparing(a->unidadesPorArticulo((Articulo)a)).reversed())
+                .forEach(a->System.out.println(a.getDescripcion()+"- Total: "+unidadesPorArticulo(a)));
+    }
+    private void cinco(){
+        int contador;
+        ArrayList<Cliente> clientesAux= new ArrayList(clientes.values());
+        ArrayList<Cliente> clienteNuncaPedido= new ArrayList();
+        for (Cliente c : clientesAux) {
+            contador=0;
+            for (Pedido p : pedidos) {
+                if (c.getIdCliente().equalsIgnoreCase(p.getClientePedido().getIdCliente())) {
+                    contador++;
+                }
+            }
+            if (contador==0) {
+            clienteNuncaPedido.add(c); 
+            }
+        }
+        System.out.println(clienteNuncaPedido);
+    }
+    private int unidadesPorArticulo(Articulo a){
+        int total=0;
+        for (Pedido p : pedidos) {
+            for (LineaPedido l : p.getCestaCompra()) {
+                if (l.getIdArticulo().matches(a.getIdArticulo())) {
+                    total+=l.getUnidades();
+                }
+            }
+                
+            }
+        
+        return total;
+    }
+//</editor-fold>
 }
