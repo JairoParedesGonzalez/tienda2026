@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -44,8 +46,6 @@ public class Tienda2026 {
         Tienda2026 t2026=new Tienda2026();
         t2026.cargaDatos();
         t2026.menu();
-        //t2026.filtrarPorPrecio();
-        //t2026.filtradoArticuloPorValor();
         //t2026.uno();
         //t2026.dos();
         //t2026.tres();
@@ -91,6 +91,7 @@ public class Tienda2026 {
             System.out.println("\t\t\t\t1 - ARTICULOS");
             System.out.println("\t\t\t\t2 - CLIENTES");
             System.out.println("\t\t\t\t3 - PEDIDOS");
+            System.out.println("\t\t\t\t4 - LISTADOS CON STREAMS");
             System.out.println("\t\t\t\t9 - SALIR");
             opcion=sc.nextInt();
             switch (opcion){
@@ -104,6 +105,10 @@ public class Tienda2026 {
                 } 
                 case 3:{
                     menuPedidos();
+                    break;
+                } 
+                case 4:{
+                    listadosStreams();
                     break;
                 } 
             }
@@ -360,26 +365,55 @@ public class Tienda2026 {
     }
 //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="LISTADOS CON STREAMS">
-    private void pedidoOrdenadoMayorAMenorPrecioTotal(){
-        pedidos.stream().sorted(Comparator.comparingDouble(p->totalPedido((Pedido)p)).reversed())
-                .forEach(p->System.out.println(p+"- Total: "+totalPedido(p)));
-    }
-    private void filtrarPorPrecio(){
-        pedidos.stream().filter(p->totalPedido((Pedido)p)>1000)
-                .forEach(p->System.out.println(p+"- Total: "+totalPedido(p)));
-    }
-    private void filtradoArticuloPorValor(){
-        articulos.values().stream()
-                .filter(a->a.getPvp()<100)
-                .sorted(Comparator.comparing(Articulo::getPvp)).forEach(a->System.out.println(a));
-        //simplemente mostramos todos los articulos menores de 100 euros ordenados por precio de menor a mayor
-        System.out.println("");
-        articulos.values().stream()
-                .filter(a->a.getPvp()<100)
-                .sorted(Comparator.comparing(Articulo::getPvp).reversed()).forEach(a->System.out.println(a));
-
-        /*ArrayList<Articulo> articulosAux= new ArrayList(articulos.values());//convertimos un Hashmap a arraylist
-        articulosAux.stream().sorted().forEach(a->System.out.println(a));*/
+    private void listadosStreams (){
+        int opcion=0;
+        do{
+            System.out.println("\n\n\n\n\n\t\t\t\tSTREAMS\n");
+            System.out.println("\t\t\t\t1 - PRECIO TOTAL DE PEDIDOS ORDENADOS DE MAYOR A MENOR");
+            System.out.println("\t\t\t\t2 - PEDIDOS MAYORES DE 1000 EUROS");
+            System.out.println("\t\t\t\t3 - ARTICULOS MENORES DE 100 EUROS");
+            System.out.println("\t\t\t\t4 - ARTICULOS ENTRE 10 Y 100 EUROS");
+            System.out.println("\t\t\t\t5 - CONTABILIZA LOS PEDIDOS DE UN CLIENTE");
+            System.out.println("\t\t\t\t6 - CONTABILIZA LOS PEDIDOS POR CLIENTE");
+            System.out.println("\t\t\t\t99 - SALIR");
+            opcion=sc.nextInt();
+            switch (opcion){
+                case 1:{
+                    pedidos.stream().sorted(Comparator.comparingDouble(p->totalPedido((Pedido)p)).reversed())
+                        .forEach(p->System.out.println(p+"- Total: "+totalPedido(p)));
+                    break;
+                }    
+                case 2:{
+                    pedidos.stream().filter(p->totalPedido((Pedido)p)>1000)
+                        .forEach(p->System.out.println(p+"- Total: "+totalPedido(p)));
+                    break;
+                } 
+                case 3:{
+                    articulos.values().stream().filter(a->a.getPvp()<100)
+                        .sorted(Comparator.comparing(Articulo::getPvp).reversed()).forEach(a->System.out.println(a));
+                    break;
+                } 
+                case 4:{
+                    articulos.values().stream().filter(a->a.getPvp()<100 && a.getPvp()>10)
+                        .sorted(Comparator.comparing(Articulo::getPvp).reversed()).forEach(a->System.out.println(a));
+                    break;
+                } 
+                case 5:{
+                    System.out.println("Introduce el dni del cliente");
+                    String dni=sc.next();
+                    long numPedidos=pedidos.stream().filter(p->p.getClientePedido().getIdCliente().matches(dni)).count();
+                    System.out.println(clientes.get(dni).getNombre()+" tiene "+numPedidos);
+                    break;
+                }
+                case 6:{
+                    Map<Cliente, Long>numPedidosPorCliente=
+                    pedidos.stream().collect(Collectors.groupingBy(Pedido::getClientePedido,Collectors.counting()));
+                    System.out.println(numPedidosPorCliente);
+                    break;
+                }
+            }
+        }while (opcion != 99);
+    
     }
 //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="EXAMEN">
