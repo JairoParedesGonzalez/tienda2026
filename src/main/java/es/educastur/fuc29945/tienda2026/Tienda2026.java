@@ -4,7 +4,6 @@
 
 package es.educastur.fuc29945.tienda2026;
 
-import java.net.ContentHandlerFactory;
 import java.util.Scanner;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,6 +21,18 @@ public class Tienda2026 {
     private ArrayList<Pedido> pedidos;
     private HashMap <String, Articulo> articulos;
     private HashMap <String, Cliente> clientes;
+
+    public ArrayList<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    public HashMap<String, Articulo> getArticulos() {
+        return articulos;
+    }
+
+    public HashMap<String, Cliente> getClientes() {
+        return clientes;
+    }
     
     public Tienda2026() {
         pedidos = new ArrayList();
@@ -32,14 +43,14 @@ public class Tienda2026 {
     public static void main(String[] args) {
         Tienda2026 t2026=new Tienda2026();
         t2026.cargaDatos();
-        //t2026.menu();
+        t2026.menu();
         //t2026.filtrarPorPrecio();
         //t2026.filtradoArticuloPorValor();
-        t2026.uno();
-        t2026.dos();
-        t2026.tres();
-        t2026.cuatro();
-        t2026.cinco();
+        //t2026.uno();
+        //t2026.dos();
+        //t2026.tres();
+        //t2026.cuatro();
+        //t2026.cinco();
     }
     //<editor-fold defaultstate="collapsed" desc="CARGA DATOS">
     public void cargaDatos(){
@@ -60,15 +71,15 @@ public class Tienda2026 {
        
        LocalDate hoy = LocalDate.now();
        pedidos.add(new Pedido("80580845T-001/2025",clientes.get("80580845T"),hoy.minusDays(1), new ArrayList<>
-        (List.of(new LineaPedido("1-11",3),new LineaPedido("4-22",3)))));                                                                                                                                                               
+        (List.of(new LineaPedido(articulos.get("1-11"),3),new LineaPedido(articulos.get("4-22"),3)))));                                                                                                                                                               
        pedidos.add(new Pedido("80580845T-002/2025",clientes.get("80580845T"),hoy.minusDays(2), new ArrayList<>
-        (List.of(new LineaPedido("4-11",3),new LineaPedido("4-22",2),new LineaPedido("4-33",4)))));
+        (List.of(new LineaPedido(articulos.get("4-11"),3),new LineaPedido(articulos.get("4-22"),2),new LineaPedido(articulos.get("4-33"),4)))));
        pedidos.add(new Pedido("36347775R-001/2025",clientes.get("36347775R"),hoy.minusDays(3), new ArrayList<>
-        (List.of(new LineaPedido("4-22",1),new LineaPedido("2-22",3)))));
+        (List.of(new LineaPedido(articulos.get("4-22"),1),new LineaPedido(articulos.get("2-22"),3)))));
        pedidos.add(new Pedido("36347775R-002/2025",clientes.get("36347775R"),hoy.minusDays(5), new ArrayList<>
-        (List.of(new LineaPedido("4-33",3),new LineaPedido("2-11",3)))));
+        (List.of(new LineaPedido(articulos.get("4-33"),3),new LineaPedido(articulos.get("2-11"),3)))));
        pedidos.add(new Pedido("63921307Y-001/2025",clientes.get("63921307Y"),hoy.minusDays(4), new ArrayList<>
-        (List.of(new LineaPedido("2-11",5),new LineaPedido("2-33",3),new LineaPedido("4-33",2)))));
+        (List.of(new LineaPedido(articulos.get("2-11"),5),new LineaPedido(articulos.get("2-33"),3),new LineaPedido(articulos.get("4-33"),2)))));
     }
 //</editor-fold>
     
@@ -206,7 +217,7 @@ public class Tienda2026 {
     private void bajaArticulos() {
     }
     private void reposicionArticulos() {
-        
+    
     }
     private void listarArticulos() {
         System.out.println("Listado de Articulos");
@@ -274,7 +285,7 @@ public class Tienda2026 {
             unidades=sc.nextInt();
             try {
                 stock(idArticulo, unidades);
-                cestaCompra.add(new LineaPedido(idArticulo,unidades));
+                cestaCompra.add(new LineaPedido(articulos.get(idArticulo),unidades));
             } catch (StockCero ex) {
                 System.out.println(ex.getMessage());
             }
@@ -283,7 +294,7 @@ public class Tienda2026 {
                 System.out.println("Si quiere puede proseguir con la compra de estas unidades, teclee la Si o NO para finalizar la compra de este articulo");
                 String respuesta=sc.next();
                 if (respuesta.equalsIgnoreCase("Si")) {
-                    cestaCompra.add(new LineaPedido(idArticulo,articulos.get(idArticulo).getExistencias()));
+                    cestaCompra.add(new LineaPedido(articulos.get(idArticulo),articulos.get(idArticulo).getExistencias()));
                 }
             }
             System.out.println("Teclee el ID del articulo deseado (Fin para terminar la compra)");
@@ -294,10 +305,9 @@ public class Tienda2026 {
             double precioTotal=0;
             for (LineaPedido l: cestaCompra) {
                 double pvpPorArticulo=0;
-                pvpPorArticulo=articulos.get(l.getIdArticulo()).getPvp()*l.getUnidades();
-                System.out.println(l.getIdArticulo()+"- "
-                        +articulos.get(l.getIdArticulo()).getDescripcion()+"- "
-                        +l.getUnidades()+"- "+articulos.get(l.getIdArticulo()).getPvp()+"- "+pvpPorArticulo);
+                pvpPorArticulo=l.getArticulo().getPvp()*l.getUnidades();
+                System.out.println(l.getArticulo().getDescripcion()+" - "
+                        +l.getUnidades()+" - "+l.getArticulo().getPvp()+" - "+pvpPorArticulo);
                 precioTotal+=pvpPorArticulo;
             }
             System.out.println("El precio total de la operacion es "+precioTotal);
@@ -306,7 +316,7 @@ public class Tienda2026 {
             if (respuesta.equalsIgnoreCase("Si")) {
                 pedidos.add(new Pedido(generarIdPedido(idCliente), clientes.get(idCliente), LocalDate.now(), cestaCompra));
                 for (LineaPedido l: cestaCompra) {
-                    articulos.get(l.getIdArticulo()).setExistencias(articulos.get(l.getIdArticulo()).getExistencias()-l.getUnidades());
+                    l.getArticulo().setExistencias(l.getArticulo().getExistencias()-l.getUnidades());
                 }
             } 
         }    
@@ -331,10 +341,10 @@ public class Tienda2026 {
         nuevoId = idCliente + "-" + String.format("%03d", contador) + "/" + LocalDate.now().getYear();
         return nuevoId;
     }
-    private double totalPedido (Pedido p){
+    public double totalPedido (Pedido p){
         double total=0;
         for (LineaPedido l : p.getCestaCompra()) {
-            total+=articulos.get(l.getIdArticulo()).getPvp()*l.getUnidades();
+            total+=l.getArticulo().getPvp()*l.getUnidades();
         }
         return total;
     }
@@ -432,7 +442,7 @@ public class Tienda2026 {
             double precioPedido=0;
             if (p.getClientePedido().getIdCliente().equalsIgnoreCase(idCliente)) {
                 for (LineaPedido l : p.getCestaCompra()) {
-                    precioPedido+=l.getUnidades()*articulos.get(l.getIdArticulo()).getPvp();
+                    precioPedido+=l.getUnidades()*l.getArticulo().getPvp();
                     
                 }
                 System.out.println(p+" - "+precioPedido);
@@ -447,9 +457,8 @@ public class Tienda2026 {
     }
     private void cinco(){
         int contador;
-        ArrayList<Cliente> clientesAux= new ArrayList(clientes.values());
         ArrayList<Cliente> clienteNuncaPedido= new ArrayList();
-        for (Cliente c : clientesAux) {
+        for (Cliente c : clientes.values()) {
             contador=0;
             for (Pedido p : pedidos) {
                 if (c.getIdCliente().equalsIgnoreCase(p.getClientePedido().getIdCliente())) {
@@ -460,18 +469,18 @@ public class Tienda2026 {
             clienteNuncaPedido.add(c); 
             }
         }
+        System.out.println("Listado de clientes sin pedido: ");
         System.out.println(clienteNuncaPedido);
     }
     private int unidadesPorArticulo(Articulo a){
         int total=0;
         for (Pedido p : pedidos) {
             for (LineaPedido l : p.getCestaCompra()) {
-                if (l.getIdArticulo().matches(a.getIdArticulo())) {
+                if (l.getArticulo().equals(a)) {
                     total+=l.getUnidades();
                 }
-            }
-                
-            }
+            }        
+        }
         
         return total;
     }
