@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -375,6 +376,9 @@ public class Tienda2026 {
             System.out.println("\t\t\t\t4 - ARTICULOS ENTRE 10 Y 100 EUROS");
             System.out.println("\t\t\t\t5 - CONTABILIZA LOS PEDIDOS DE UN CLIENTE");
             System.out.println("\t\t\t\t6 - CONTABILIZA LOS PEDIDOS POR CLIENTE");
+            System.out.println("\t\t\t\t7 - UNIDADES DE TODAS LAS UNIDADES VENDIDAS DE UN ARTICULO");
+            System.out.println("\t\t\t\t8 - UNIDADES QUE HA COMPRADO CADA CLIENTE DE UN ARTICULO INTRODUCIDO POR TECLADO");
+            System.out.println("\t\t\t\t9 - LISTADO DE ARTICULOS QUE HAN SIDO VENDIDOS SIN REPETICIONES");
             System.out.println("\t\t\t\t99 - SALIR");
             opcion=sc.nextInt();
             switch (opcion){
@@ -402,14 +406,43 @@ public class Tienda2026 {
                     System.out.println("Introduce el dni del cliente");
                     String dni=sc.next();
                     long numPedidos=pedidos.stream().filter(p->p.getClientePedido().getIdCliente().matches(dni)).count();
-                    System.out.println(clientes.get(dni).getNombre()+" tiene "+numPedidos);
+                    System.out.println(clientes.get(dni).getNombre()+" tiene "+numPedidos +" pedido/s");
                     break;
                 }
                 case 6:{
                     Map<Cliente, Long>numPedidosPorCliente=
                     pedidos.stream().collect(Collectors.groupingBy(Pedido::getClientePedido,Collectors.counting()));
-                    System.out.println(numPedidosPorCliente);
+                    for (Cliente c : numPedidosPorCliente.keySet()) {
+                        System.out.println(c+"-"+numPedidosPorCliente.get(c));
+                    }
                     break;
+                }
+                case 7:{
+                    for (Articulo a : articulos.values()) {
+                        int total=0;
+                        for (Pedido p : pedidos) {
+                            total+=p.getCestaCompra().stream()
+                                    .filter(l->l.getArticulo().equals(a)).mapToInt(LineaPedido::getUnidades).sum();
+                        }
+                        System.out.println(a+"-"+total);
+                    }
+                }
+                case 8:{
+                    System.out.println("Introduce el id del articulo");
+                    String idArticulo=sc.next();
+                    for (Cliente c : clientes.values()) {
+                        int unidades=pedidos.stream().filter(p->p.getClientePedido().equals(c))
+                                .flatMap(p->p.getCestaCompra().stream()).filter(l->l.getArticulo().equals(articulos.get(idArticulo)))
+                                .mapToInt(LineaPedido::getUnidades).sum();
+                        System.out.println(c.getNombre()+" ha comprado "+unidades
+                                +" de "+articulos.get(idArticulo).getDescripcion());
+                    }   
+                }
+                case 9:{
+                    Set <Articulo> articulosVendidos=
+                            pedidos.stream().flatMap(p->p.getCestaCompra().stream())
+                            .map(LineaPedido::getArticulo).collect(Collectors.toSet());
+                    articulosVendidos.stream().forEach(a->System.out.println(a));
                 }
             }
         }while (opcion != 99);
@@ -486,8 +519,8 @@ public class Tienda2026 {
         System.out.println("Total gastado: "+precioTotal);
     }
     private void cuatro(){
-        articulos.values().stream().sorted(Comparator.comparing(a->unidadesPorArticulo((Articulo)a)).reversed())
-                .forEach(a->System.out.println(a.getDescripcion()+"- Total: "+unidadesPorArticulo(a)));
+        articulos.values().stream().sorted(Comparator.comparing(a->unidadesPorArticulo2((Articulo)a)).reversed())
+                .forEach(a->System.out.println(a.getDescripcion()+"- Total: "+unidadesPorArticulo2(a)));
     }
     private void cinco(){
         int contador;
@@ -517,6 +550,10 @@ public class Tienda2026 {
         }
         
         return total;
+    }
+    private int unidadesPorArticulo2 (Articulo a){
+        return pedidos.stream().flatMap(p->p.getCestaCompra().stream())
+                .filter(l->l.getArticulo().equals(a)).mapToInt(LineaPedido::getUnidades).sum();
     }
 //</editor-fold>
 }
