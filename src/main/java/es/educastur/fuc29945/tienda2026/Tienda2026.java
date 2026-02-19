@@ -46,12 +46,13 @@ public class Tienda2026 {
     public static void main(String[] args) {
         Tienda2026 t2026=new Tienda2026();
         t2026.cargaDatos();
-        t2026.menu();
+        //t2026.menu();
         //t2026.uno();
         //t2026.dos();
         //t2026.tres();
         //t2026.cuatro();
         //t2026.cinco();
+        t2026.unidadesTotalesVendidasPorArticulo();
     }
     //<editor-fold defaultstate="collapsed" desc="CARGA DATOS">
     public void cargaDatos(){
@@ -555,5 +556,52 @@ public class Tienda2026 {
         return pedidos.stream().flatMap(p->p.getCestaCompra().stream())
                 .filter(l->l.getArticulo().equals(a)).mapToInt(LineaPedido::getUnidades).sum();
     }
+//</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Listados Streams Practica">
+    private void pedidosOrdenadosPorFecha(){
+        pedidos.stream().sorted(Comparator.comparing(Pedido::getFechaPedido))
+                .forEach(p->System.out.println(p));
+    }
+    private void clientesCompradoArticuloSinStockActual (){
+        pedidos.stream().filter(p->p.getCestaCompra().stream()
+                .anyMatch(l->l.getArticulo().getExistencias()==0))
+                .map(Pedido::getClientePedido).collect(Collectors.toSet()).forEach(c->System.out.println(c));
+        
+    }
+    private void totalPedidoCliente (){
+        Map<Cliente, Double>totalPvpPorCliente=
+                    pedidos.stream().collect(Collectors.groupingBy(Pedido::getClientePedido,Collectors.summingDouble(p->totalPedido(p))));
+                    for (Cliente c : totalPvpPorCliente.keySet()) {
+                        System.out.println(c+"-"+totalPvpPorCliente.get(c));
+                    }
+    }
+    private void articuloMasVendido (){
+        Map <Articulo, Integer> articuloMasVendido=
+        pedidos.stream().flatMap(p->p.getCestaCompra().stream())
+                .collect(Collectors.groupingBy(LineaPedido::getArticulo,Collectors.summingInt(LineaPedido::getUnidades)));
+        articuloMasVendido.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .ifPresent(e->System.out.println("Articulo mas vendido: "+e.getKey().getDescripcion()+"- Unidades: "+e.getValue()));
+    }
+    private void pedidoMasCaro(){
+        pedidos.stream().max(Comparator.comparingDouble(p->totalPedido(p)))
+                .ifPresent(p->System.out.println("Pedido mas caro: "+p+"- Total:"+totalPedido(p)));
+    }
+    private void articulosVendidosOrdenados(){
+        Set <Articulo> articulosVendidos=
+                pedidos.stream().flatMap(p->p.getCestaCompra().stream())
+                    .map(LineaPedido::getArticulo).collect(Collectors.toSet());
+        articulosVendidos.stream().sorted(Comparator.comparing(a->a.getDescripcion())).forEach(a->System.out.println(a));
+    }
+    private void unidadesTotalesVendidasPorArticulo(){
+        pedidos.stream().flatMap(p->p.getCestaCompra().stream())
+                .collect(Collectors.groupingBy(LineaPedido::getArticulo,Collectors.summingInt(LineaPedido::getUnidades)))
+                .forEach((a,unidades)->System.out.println(a.getDescripcion()+"-"+unidades+" unidades"));
+    }
+    private void pedidosOrdenadosPorFechaAscendente(){
+        pedidos.stream().sorted(Comparator.comparing(Pedido::getFechaPedido).reversed())
+                .forEach(p->System.out.println(p));
+    }
+
 //</editor-fold>
 }
